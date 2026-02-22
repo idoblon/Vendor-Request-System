@@ -1,5 +1,6 @@
 import React from 'react';
-import { Link, useLocation, Outlet } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 interface LayoutProps {
   children?: React.ReactNode;
@@ -7,6 +8,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
+  const { user } = useAuth();
 
   const isActive = (path: string) => {
     return location.pathname === path ? 'bg-gray-700' : 'text-gray-400 hover:bg-gray-700';
@@ -19,7 +21,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="w-64 bg-gray-800 min-h-screen p-4">
           <div className="flex items-center mb-8">
             <img src="/vrslogo.png" alt="VRS Logo" className="h-10 w-10 rounded-full" />
-            <span className="text-xl font-bold ml-2">VRS</span>
+            <div className="ml-2">
+              <span className="text-xl font-bold block">VRS</span>
+              {user && <span className="text-xs text-gray-400">{user.name}</span>}
+            </div>
           </div>
           
           <nav className="space-y-2">
@@ -110,7 +115,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         
         {/* Main content */}
         <div className="flex-1 p-6">
-          {children || <Outlet />}
+          {children}
         </div>
       </div>
     </div>

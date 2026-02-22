@@ -1,7 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Login from './components/Login';
 import Register from './components/Register';
+import Logout from './components/Logout';
 import Layout from './components/Layout';
 import Dashboard from './components/Dashboard';
 import AddProduct from './pages/AddProduct';
@@ -11,108 +13,110 @@ import Orders from './pages/Orders';
 import Payments from './pages/Payments';
 import Profile from './pages/Profile';
 
-const App: React.FC = () => {
-  // For now, we'll use a simple isAuthenticated check
-  // In a real app, this would come from your auth context/state
-  const isAuthenticated = true;
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    );
+  }
+
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+};
+
+const AppRoutes: React.FC = () => {
   return (
-    <Router>
-      <Routes>
-        {/* Public routes */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/logout" element={<Logout />} />
 
-        {/* Protected routes with layout */}
-        <Route
-          path="/"
-          element={
-            isAuthenticated ? (
-              <Layout>
-                <Dashboard />
-              </Layout>
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        <Route
-          path="/add-product"
-          element={
-            isAuthenticated ? (
-              <Layout>
-                <AddProduct />
-              </Layout>
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        <Route
-          path="/all-products"
-          element={
-            isAuthenticated ? (
-              <Layout>
-                <AllProducts />
-              </Layout>
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        <Route
-          path="/discount-products"
-          element={
-            isAuthenticated ? (
-              <Layout>
-                <DiscountProducts />
-              </Layout>
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        <Route
-          path="/orders"
-          element={
-            isAuthenticated ? (
-              <Layout>
-                <Orders />
-              </Layout>
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        <Route
-          path="/payments"
-          element={
-            isAuthenticated ? (
-              <Layout>
-                <Payments />
-              </Layout>
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            isAuthenticated ? (
-              <Layout>
-                <Profile />
-              </Layout>
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
-        />
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Dashboard />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/add-product"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <AddProduct />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/all-products"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <AllProducts />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/discount-products"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <DiscountProducts />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/orders"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Orders />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/payments"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Payments />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Profile />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
 
-        {/* Redirect to login for any other route */}
-        <Route path="*" element={<Navigate to="/login" replace />} />
-      </Routes>
-    </Router>
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <Router>
+        <AppRoutes />
+      </Router>
+    </AuthProvider>
   );
 };
 

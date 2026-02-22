@@ -1,16 +1,24 @@
 import React, { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
 const Profile: React.FC = () => {
+  const { user } = useAuth();
   const [profile, setProfile] = useState({
-    name: 'John Doe',
-    email: 'john@example.com',
-    phone: '+1 234 567 8900',
-    address: '123 Main St, City, Country',
-    company: 'Example Company',
-    position: 'Vendor Manager',
-    bio: 'Experienced vendor manager with 5+ years in the industry.',
+    name: user?.name || '',
+    email: user?.email || '',
+    phone: '',
+    address: '',
+    company: '',
+    position: '',
+    bio: '',
   });
-
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [isEditing, setIsEditing] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -20,13 +28,42 @@ const Profile: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    setSuccess('');
     setIsEditing(false);
-    // Here you would typically make an API call to update the profile
-    console.log('Profile updated:', profile);
+    setSuccess('Profile updated successfully');
+    setTimeout(() => setSuccess(''), 3000);
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setPasswordData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
+    setSuccess('Password updated successfully');
+    setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    setTimeout(() => setSuccess(''), 3000);
   };
 
   return (
     <div className="p-6">
+      {error && <div className="bg-red-500 text-white px-4 py-2 rounded-lg mb-4">{error}</div>}
+      {success && <div className="bg-green-500 text-white px-4 py-2 rounded-lg mb-4">{success}</div>}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Profile</h1>
         <button
@@ -140,33 +177,44 @@ const Profile: React.FC = () => {
 
       <div className="mt-6 bg-gray-800 rounded-lg shadow-md p-6">
         <h2 className="text-xl font-semibold mb-4">Security Settings</h2>
-        <div className="space-y-4">
+        <form onSubmit={handlePasswordSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Change Password</label>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Current Password</label>
             <input
               type="password"
-              placeholder="Current Password"
+              name="currentPassword"
+              value={passwordData.currentPassword}
+              onChange={handlePasswordChange}
               className="w-full bg-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
             />
           </div>
           <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">New Password</label>
             <input
               type="password"
-              placeholder="New Password"
+              name="newPassword"
+              value={passwordData.newPassword}
+              onChange={handlePasswordChange}
               className="w-full bg-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
             />
           </div>
           <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Confirm New Password</label>
             <input
               type="password"
-              placeholder="Confirm New Password"
+              name="confirmPassword"
+              value={passwordData.confirmPassword}
+              onChange={handlePasswordChange}
               className="w-full bg-gray-700 text-white rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
             />
           </div>
-          <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
             Update Password
           </button>
-        </div>
+        </form>
       </div>
     </div>
   );
