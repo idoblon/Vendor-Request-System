@@ -1,3 +1,7 @@
+import { OrderStatus } from '../types/order';
+
+export const ORDER_STATUSES: OrderStatus[] = ['pending', 'processing', 'completed', 'cancelled'];
+
 export const CATEGORIES = ['Electronics', 'Accessories', 'Clothing', 'Food', 'Books', 'Other'];
 
 export const ITEMS_PER_PAGE = 10;
