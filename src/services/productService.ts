@@ -1,4 +1,6 @@
 import { Product } from '../types/product';
+import { emailService } from './emailService';
+import { LOW_STOCK_THRESHOLD } from '../constants';
 
 const STORAGE_KEY = 'vrs_products';
 
@@ -99,7 +101,7 @@ export const productService = {
 
   update: async (id: string, data: Partial<Product>): Promise<Product> => {
     return new Promise((resolve, reject) => {
-      setTimeout(() => {
+      setTimeout(async () => {
         const products = getStoredProducts();
         const index = products.findIndex(p => p.id === id);
         if (index === -1) {
@@ -112,6 +114,12 @@ export const productService = {
           updatedAt: new Date().toISOString(),
         };
         saveProducts(products);
+        
+        // Check for low stock and send alert
+        if (products[index].stock < LOW_STOCK_THRESHOLD) {
+          await emailService.sendLowStockAlert(products[index], 'admin@vrs.com');
+        }
+        
         resolve(products[index]);
       }, 300);
     });

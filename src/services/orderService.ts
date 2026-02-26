@@ -1,4 +1,5 @@
 import { Order, OrderStatus } from '../types/order';
+import { emailService } from './emailService';
 
 const STORAGE_KEY = 'vrs_orders';
 
@@ -102,19 +103,24 @@ export const orderService = {
 
   updateStatus: async (id: string, status: OrderStatus): Promise<Order> => {
     return new Promise((resolve, reject) => {
-      setTimeout(() => {
+      setTimeout(async () => {
         const orders = getStoredOrders();
         const index = orders.findIndex(o => o.id === id);
         if (index === -1) {
           reject(new Error('Order not found'));
           return;
         }
+        const oldStatus = orders[index].status;
         orders[index] = {
           ...orders[index],
           status,
           updatedAt: new Date().toISOString(),
         };
         saveOrders(orders);
+        
+        // Send email notification
+        await emailService.sendOrderStatusUpdate(orders[index], oldStatus);
+        
         resolve(orders[index]);
       }, 300);
     });

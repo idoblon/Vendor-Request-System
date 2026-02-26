@@ -90,6 +90,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(mockUser);
       localStorage.setItem('token', mockToken);
       localStorage.setItem('user', JSON.stringify(mockUser));
+      
+      // Send welcome email
+      const { emailService } = await import('../services/emailService');
+      await emailService.sendWelcomeEmail(name, email);
     }
   };
 

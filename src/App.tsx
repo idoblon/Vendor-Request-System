@@ -12,6 +12,7 @@ import DiscountProducts from './pages/DiscountProducts';
 import Orders from './pages/Orders';
 import Payments from './pages/Payments';
 import Profile from './pages/Profile';
+import EmailNotifications from './pages/EmailNotifications';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
@@ -100,6 +101,16 @@ const AppRoutes: React.FC = () => {
           <ProtectedRoute>
             <Layout>
               <Profile />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/email-notifications"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <EmailNotifications />
             </Layout>
           </ProtectedRoute>
         }
